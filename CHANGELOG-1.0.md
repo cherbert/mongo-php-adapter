@@ -3,6 +3,45 @@ CHANGELOG
 
 This changelog references the relevant changes done in minor version updates.
 
+1.0.6 (xxxx-xx-xx)
+------------------
+
+All issues and pull requests under this release may be found under the
+[1.0.6](https://github.com/alcaeus/mongo-php-adapter/issues?q=milestone%3A1.0.5)
+milestone.
+
+ * [#126](https://github.com/alcaeus/mongo-php-adapter/pull/126) fixes a class
+ name that was improperly capitalized.
+
+1.0.5 (2016-07-03)
+------------------
+
+All issues and pull requests under this release may be found under the
+[1.0.5](https://github.com/alcaeus/mongo-php-adapter/issues?q=milestone%3A1.0.5)
+milestone.
+
+ * [#117](https://github.com/alcaeus/mongo-php-adapter/pull/117) adds a missing
+ flag to indexes when calling `MongoCollection::getIndexInfo`.
+ * [#120](https://github.com/alcaeus/mongo-php-adapter/pull/120) throws the proper
+ `MongoWriteConcernException` when encountering bulk write errors.
+ * [#122](https://github.com/alcaeus/mongo-php-adapter/pull/122) fixes an error in
+ `MongoCollection::findAndModify` when specifying both the `update` parameter as
+ well as the `update` option.
+
+1.0.4 (2016-06-22)
+------------------
+
+All issues and pull requests under this release may be found under the
+[1.0.4](https://github.com/alcaeus/mongo-php-adapter/issues?q=milestone%3A1.0.4)
+milestone.
+
+ * [#115](https://github.com/alcaeus/mongo-php-adapter/pull/115) fixes an error
+ where using the alternate syntax for `MongoCollection::aggregate` would lead to
+ empty aggregation pipelines
+ * [#116](https://github.com/alcaeus/mongo-php-adapter/pull/116) fixes a bug
+ where read preference and write concern was not applied if it was passed in the
+ constructor.
+
 1.0.3 (2016-04-13)
 ------------------
 

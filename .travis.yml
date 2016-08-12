@@ -2,17 +2,16 @@ sudo: false
 language: php
 
 php:
-  - 5.5
   - 5.6
   - 7.0
 
 env:
-  - DRIVER_VERSION=stable
+  - DRIVER_VERSION=1.2.0alpha1
 
 matrix:
   include:
     - php: 5.6
-      env: DRIVER_VERSION=stable LEGACY_DRIVER_VERSION=stable
+      env: DRIVER_VERSION=1.2.0alpha1 LEGACY_DRIVER_VERSION=stable
 
 addons:
   apt:

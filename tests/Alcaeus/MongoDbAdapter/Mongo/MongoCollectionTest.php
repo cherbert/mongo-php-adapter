@@ -600,6 +600,40 @@ class MongoCollectionTest extends TestCase
         ], $result['result']);
     }
 
+    public function testAggregateWithMultiplePilelineOperatorsAsArguments()
+    {
+        $collection = $this->getCollection();
+
+        $this->prepareData();
+
+        try {
+            $result = $collection->aggregate(
+                [
+                    '$group' => [
+                        '_id' => '$foo',
+                        'count' => [ '$sum' => 1 ],
+                    ],
+                ],
+                [
+                    '$sort' => ['_id' => 1]
+                ]
+            );
+        } catch (\MongoResultException $ex) {
+            $msg = 'MongoCollection::aggregate ( array $op [, array $op [, array $... ]] ) should accept variable amount of pipeline operators as argument'
+                . "\n"
+                . $ex;
+            $this->fail($msg);
+        }
+
+        $this->assertInternalType('array', $result);
+        $this->assertArrayHasKey('result', $result);
+
+        $this->assertEquals([
+            ['_id' => 'bar', 'count' => 2],
+            ['_id' => 'foo', 'count' => 1],
+        ], $result['result']);
+    }
+
     public function testAggregateInvalidPipeline()
     {
         $collection = $this->getCollection();
@@ -1143,6 +1177,7 @@ class MongoCollectionTest extends TestCase
     {
         $collection = $this->getCollection();
         $collection->createIndex(['foo' => 1]);
+        $collection->createIndex(['bar' => 1], ['unique' => true]);
 
         $expected = [
             [
@@ -1157,9 +1192,16 @@ class MongoCollectionTest extends TestCase
                 'name' => 'foo_1',
                 'ns' => 'mongo-php-adapter.test',
             ],
+            [
+                'v' => 1,
+                'key' => ['bar' => 1],
+                'name' => 'bar_1',
+                'ns' => 'mongo-php-adapter.test',
+                'unique' => true,
+            ],
         ];
 
-        $this->assertSame(
+        $this->assertEquals(
             $expected,
             $collection->getIndexInfo()
         );
@@ -1210,6 +1252,35 @@ class MongoCollectionTest extends TestCase
         $this->assertNotNull($object);
         $this->assertAttributeSame('foo', 'bar', $object);
         $this->assertObjectNotHasAttribute('foo', $object);
+    }
+
+    public function testFindAndModifyWithUpdateParamAndOption()
+    {
+        $id = '54203e08d51d4a1f868b456e';
+        $collection = $this->getCollection();
+
+        $document = ['_id' => new \MongoId($id), 'foo' => 'bar'];
+        $collection->insert($document);
+
+        $data = ['foo' => 'foo', 'bar' => 'bar'];
+
+        $this->getCollection()->findAndModify(
+            ['_id' => new \MongoId($id)],
+            [$data],
+            [],
+            [
+                'update' => ['$set' => ['foo' => 'foobar']],
+                'upsert' => true,
+            ]
+        );
+
+        $newCollection = $this->getCheckDatabase()->selectCollection('test');
+        $this->assertSame(1, $newCollection->count());
+        $object = $newCollection->findOne();
+
+        $this->assertNotNull($object);
+        $this->assertAttributeSame('foobar', 'foo', $object);
+        $this->assertObjectNotHasAttribute('bar', $object);
     }
 
     public function testFindAndModifyUpdateReplace()
