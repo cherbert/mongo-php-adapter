@@ -13,11 +13,13 @@ compatible with PHP 7.
 # Goal
 
 This library aims to provide a compatibility layer for applications that rely on
-on libraries using ext-mongo (e.g. [Doctrine ODM](https://github.com/doctrine/mongodb-odm))
-but want to migrate to PHP 7 or HHVM on which ext-mongo will not run.
+libraries using ext-mongo, e.g.
+[Doctrine MongoDB ODM](https://github.com/doctrine/mongodb-odm), but want to
+migrate to PHP 7 on which `ext-mongo` will not run.
 
 You should not be using this library if you do not rely on a library using
-`ext-mongo`. If you are starting a new project, please check out [mongodb/mongodb](https://github.com/mongodb/mongo-php-library).
+`ext-mongo`. If you are starting a new project, please check out
+[mongodb/mongodb](https://github.com/mongodb/mongo-php-library).
 
 # Installation
 
@@ -28,28 +30,11 @@ The preferred method of installing this library is with
 [Composer](https://getcomposer.org/) by running the following from your project
 root:
 
-    $ composer require alcaeus/mongo-php-adapter
+    $ composer config "platform.ext-mongo" "1.6.16" && composer require alcaeus/mongo-php-adapter
 
-This package declares that it provides `ext-mongo`; Composer only allows this
-replacement to apply if `composer.json` or a dependency contain a requirement,
-see [composer/composer#2690](https://github.com/composer/composer/issues/2690).
-
-Therefore, you either need to have a dependency on a package which requires
-`ext-mongo`, such as `doctrine/mongodb`, in your project:
-
-    "require": {
-        "php": "^7.0",
-        "alcaeus/mongo-php-adapter": "^1.0.0",
-        "doctrine/mongodb": "dev-master"
-    }
-
-or you need to explicitly require `ext-mongo` yourself in `composer.json`:
-
-    "require": {
-        "php": "^7.0",
-        "alcaeus/mongo-php-adapter": "^1.0.0",
-        "ext-mongo": "*"
-    }
+The above command first marks the `mongo` extension as installed, then requires
+this adapter. This is to work around a bug in composer, see
+[composer/composer#5030](https://github.com/composer/composer/issues/5030).
 
 # Known issues
 
@@ -60,6 +45,13 @@ counterparts in `ext-mongo`. Do not rely on exception messages being the same.
 
 Methods that return a result array containing a `connectionId` field will always
 return `0` as connection ID.
+
+## Errors
+
+All errors and warnings triggered by `ext-mongo` are triggered as `E_USER_WARNING`
+and `E_USER_ERROR` because `trigger_error` doesn't accept the `E_WARNING` and
+`E_USER` codes. If you rely on these error codes in your error handling routines,
+please update your code accordingly.
 
 ## Serialization of objects
 Serialization of any Mongo* objects (e.g. MongoGridFSFile, MongoCursor, etc.)
@@ -109,8 +101,6 @@ unserializing them.
  method is not yet implemented.
 
 ## MongoCursor
- - The [explain](https://php.net/manual/en/mongocursor.explain.php)
- method is not yet implemented.
  - The [info](https://php.net/manual/en/mongocursor.info.php) method does not
  reliably fill all fields in the cursor information. This includes the `numReturned`
  and `server` keys once the cursor has started iterating. The `numReturned` field
@@ -131,3 +121,16 @@ unserializing them.
  fields always return 0 for compatibility to MongoCursor. The `firstBatchAt` and
  `firstBatchNumReturned` fields will contain the same value, which is the internal
  position of the iterator.
+
+# Development
+
+If you are working on patches to this driver, you can run the unit tests by following these steps from the root of the repo directory:
+
+    $ composer install
+    $ vendor/phpunit/phpunit/phpunit --verbose
+
+It assumes that the the `localhost` is running a mongod server. Here is a sample command to start mongod for these tests:
+
+    $ mongod --smallfiles --fork --logpath /var/log/mongod.log --setParameter enableTestCommands=1
+
+The tests also assume PHP 5.6+ and the `ext-mongodb` extension being available.

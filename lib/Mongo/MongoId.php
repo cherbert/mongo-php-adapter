@@ -20,7 +20,7 @@ if (class_exists('MongoId', false)) {
 use Alcaeus\MongoDbAdapter\TypeInterface;
 use MongoDB\BSON\ObjectID;
 
-class MongoId implements Serializable, TypeInterface
+class MongoId implements Serializable, TypeInterface, JsonSerializable
 {
     /*
      * @var ObjectID
@@ -101,7 +101,7 @@ class MongoId implements Serializable, TypeInterface
     public function __set($name, $value)
     {
         if ($name === 'id') {
-            trigger_error("The '\$id' property is read-only", E_DEPRECATED);
+            trigger_error("The '\$id' property is read-only", E_USER_DEPRECATED);
             return;
         }
     }
@@ -121,7 +121,7 @@ class MongoId implements Serializable, TypeInterface
     public function __unset($name)
     {
         if ($name === 'id') {
-            trigger_error("The '\$id' property is read-only", E_DEPRECATED);
+            trigger_error("The '\$id' property is read-only", E_USER_DEPRECATED);
             return;
         }
     }
@@ -197,7 +197,16 @@ class MongoId implements Serializable, TypeInterface
      */
     public static function __set_state(array $props)
     {
+    }
 
+    /**
+     * @return stdClass
+     */
+    public function jsonSerialize()
+    {
+        $object = new stdClass();
+        $object->{'$id'} = (string) $this->objectID;
+        return $object;
     }
 
     /**
